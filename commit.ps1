@@ -7,7 +7,7 @@ function Get-Version {
     $filePath = "./main.cpp"  # Replace with the actual path to your main.cpp file
     $content = Get-Content -Path $filePath -Raw
 
-    # Use regex to extract version from line 16
+    # Use regex to extract version
     $versionPattern = 'const std::string VERSION = "(.+?)";'
     $versionMatch = [regex]::Match($content, $versionPattern)
 

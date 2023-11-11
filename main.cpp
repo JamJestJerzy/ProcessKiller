@@ -1,5 +1,6 @@
 // Jerzy Wciseł © All Rights Reserved 2023-2024
 
+#include <winsock2.h>
 #include <Windows.h>
 #include <iostream>
 #include <fstream>
@@ -12,6 +13,7 @@
 #include <codecvt>
 #include <conio.h>
 #include <algorithm>
+#include "libcurl/include/curl/curl.h"
 
 const std::string VERSION = "0.5.1";
 
