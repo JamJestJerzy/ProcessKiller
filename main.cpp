@@ -1,5 +1,6 @@
 // Jerzy "LifeOverflow" W © All Rights Reserved 2023-2024
 
+// Includes
 #include <winsock2.h>
 #include <Windows.h>
 #include <iostream>
@@ -19,16 +20,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const std::string VERSION = "0.5.4";
+// Current version string
+const std::string VERSION = "0.5.5";
 
+// Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
+// Initializes empty array
 std::string processesToKill[25] = {};
 
+// Namespaces or smth
 using std::vector;
 using std::cout;
 using std::endl;
 
+// Function to terminate process using its filename
 void TerminateProcessByFileName(const std::string &fileName) {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
@@ -65,6 +71,7 @@ void TerminateProcessByFileName(const std::string &fileName) {
     CloseHandle(hProcessSnap);
 }
 
+// Gets process name from its PID
 std::wstring GetTopLevelParentProcessName(DWORD processId) {
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
     if (hProcess) {
@@ -81,11 +88,12 @@ std::wstring GetTopLevelParentProcessName(DWORD processId) {
     return L"";
 }
 
+// Returns Parent process name if process have one. (probably doesn't work) ¯\_(ツ)_/¯
 std::wstring GetParentProcessName(DWORD processId) {
     while (processId != 0) {
         std::wstring parentProcessName = GetTopLevelParentProcessName(processId);
 
-        if (parentProcessName.empty() || parentProcessName.find(L"System32\\") == std::wstring::npos) {
+        if (parentProcessName.empty()/* || parentProcessName.find(L"System32\\") == std::wstring::npos*/) {
             return parentProcessName;
         }
 
@@ -155,7 +163,7 @@ void CALLBACK WinEventProc(
         DWORD dwEventThread,
         DWORD dwmsEventTime
 ) {
-    if (event == EVENT_SYSTEM_FOREGROUND) {
+    if (event == EVENT_SYSTEM_FOREGROUND || event == EVENT_SYSTEM_MINIMIZEEND || event == EVENT_SYSTEM_MINIMIZESTART) {
         DWORD processId;
         GetWindowThreadProcessId(hwnd, &processId);
 
