@@ -1,4 +1,4 @@
-// Jerzy Wciseł © All Rights Reserved 2023-2024
+// Jerzy "LifeOverflow" W © All Rights Reserved 2023-2024
 
 #include <winsock2.h>
 #include <Windows.h>
