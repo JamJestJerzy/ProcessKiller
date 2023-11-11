@@ -16,8 +16,10 @@
 #include <cstdio>
 #include <unistd.h>
 #include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
-const std::string VERSION = "0.5.1";
+const std::string VERSION = "0.5.2";
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -63,22 +65,6 @@ void TerminateProcessByFileName(const std::string& fileName) {
     CloseHandle(hProcessSnap);
 }
 
-vector<DWORD> pids_from_ppid(DWORD ppid) {
-    vector<DWORD> pids;
-    HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    PROCESSENTRY32 pe = { 0 };
-    pe.dwSize = sizeof(PROCESSENTRY32);
-    if (Process32First(hp, &pe)) {
-        do {
-            if (pe.th32ParentProcessID == ppid) {
-                pids.push_back(pe.th32ProcessID);
-            }
-        } while (Process32Next(hp, &pe));
-    }
-    CloseHandle(hp);
-    return pids;
-}
-
 std::wstring GetTopLevelParentProcessName(DWORD processId) {
     HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processId);
     if (hProcess) {
@@ -87,7 +73,7 @@ std::wstring GetTopLevelParentProcessName(DWORD processId) {
 
         if (QueryFullProcessImageNameA(hProcess, 0, processName, &size)) {
             CloseHandle(hProcess);
-            return std::wstring(processName, processName + size / sizeof(char));
+            return std::wstring(processName, processName + size / sizeof(char) - 1);
         }
 
         CloseHandle(hProcess);
@@ -182,9 +168,9 @@ void CALLBACK WinEventProc(
             std::string utf8Path = converter.to_bytes(widePath);
 
             std::filesystem::path filePath(utf8Path);
-            std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")\n";
+            std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")" << std::endl;
 
-// Print parent process information
+            // Print parent process information
             DWORD parentProcessId = GetProcessId(GetParentProcess(hwnd));
             if (parentProcessId != 0) {
                 std::wstring parentProcessPath = GetTopLevelParentProcessName(parentProcessId);
@@ -194,6 +180,9 @@ void CALLBACK WinEventProc(
                     std::cout << "Parent process: " << utf8ParentPath << std::endl;
                 }
             }
+
+            // Print Process ID (PID)
+            std::cout << "Process ID (PID): " << (int)processId << std::endl;
 
             for (std::string& i : processesToKill) {
                 std::string processName = filePath.filename().string();
