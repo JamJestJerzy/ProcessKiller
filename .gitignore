@@ -37,3 +37,4 @@ yaml-cpp
 cmake-build-debug
 \.*
 CMakeLists.txt
+*.ico
