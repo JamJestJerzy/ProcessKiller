@@ -1,6 +1,4 @@
-/* Build command:
- * g++ -o ProcessKiller .\main.cpp -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs
- */
+// Jerzy Wciseł © All Rights Reserved 2023-2024
 
 #include <Windows.h>
 #include <iostream>
