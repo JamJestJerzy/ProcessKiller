@@ -95,6 +95,47 @@ std::wstring GetParentProcessName(DWORD processId) {
     return L"";
 }
 
+HWND GetProcessWindow(DWORD processId) {
+    HWND hwnd = GetTopWindow(0);
+    while (hwnd) {
+        DWORD windowProcessId;
+        GetWindowThreadProcessId(hwnd, &windowProcessId);
+        if (windowProcessId == processId) {
+            return hwnd;
+        }
+        hwnd = GetNextWindow(hwnd, GW_HWNDNEXT);
+    }
+    return nullptr;
+}
+
+HWND GetParentProcessById(DWORD processId) {
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        return nullptr;
+    }
+
+    if (Process32First(hSnapshot, &pe32)) {
+        do {
+            if (pe32.th32ProcessID == processId) {
+                CloseHandle(hSnapshot);
+                return GetProcessWindow(pe32.th32ParentProcessID);
+            }
+        } while (Process32Next(hSnapshot, &pe32));
+    }
+
+    CloseHandle(hSnapshot);
+    return nullptr;
+}
+
+HWND GetParentProcess(HWND hwnd) {
+    DWORD processId;
+    GetWindowThreadProcessId(hwnd, &processId);
+    return GetParentProcessById(processId);
+}
+
 void CALLBACK WinEventProc(
         HWINEVENTHOOK hWinEventHook,
         DWORD event,
@@ -118,6 +159,17 @@ void CALLBACK WinEventProc(
 
             std::filesystem::path filePath(utf8Path);
             std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")\n";
+
+// Print parent process information
+            DWORD parentProcessId = GetProcessId(GetParentProcess(hwnd));
+            if (parentProcessId != 0) {
+                std::wstring parentProcessPath = GetTopLevelParentProcessName(parentProcessId);
+                if (!parentProcessPath.empty()) {
+                    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                    std::string utf8ParentPath = converter.to_bytes(parentProcessPath);
+                    std::cout << "Parent process: " << utf8ParentPath << std::endl;
+                }
+            }
 
             for (std::string& i : processesToKill) {
                 std::string processName = filePath.filename().string();
