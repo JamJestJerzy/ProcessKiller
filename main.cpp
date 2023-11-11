@@ -29,7 +29,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-void TerminateProcessByFileName(const std::string& fileName) {
+void TerminateProcessByFileName(const std::string &fileName) {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
         std::cerr << "Error creating process snapshot (" << GetLastError() << ")\n";
@@ -162,13 +162,14 @@ void CALLBACK WinEventProc(
         std::wstring parentProcessName = GetParentProcessName(processId);
 
         if (!parentProcessName.empty()) {
-            const std::wstring& widePath(parentProcessName);
+            const std::wstring &widePath(parentProcessName);
 
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::string utf8Path = converter.to_bytes(widePath);
 
             std::filesystem::path filePath(utf8Path);
-            std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")" << L" " << (int)processId << std::endl;
+            std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring()
+                       << L")" << L" " << (int) processId << std::endl;
 
             // Print parent process information
             DWORD parentProcessId = GetProcessId(GetParentProcess(hwnd));
@@ -181,7 +182,7 @@ void CALLBACK WinEventProc(
                 }
             }
 
-            for (std::string& i : processesToKill) {
+            for (std::string &i: processesToKill) {
                 std::string processName = filePath.filename().string();
 
                 std::transform(processName.begin(), processName.end(), processName.begin(), [](char c) {
@@ -243,7 +244,8 @@ J:::::::JJJ:::::::Je::::::::e           r:::::r              z::::::zzzzzzzz    
                                                                                y:::::y
                                                                               yyyyyyy
 
-                                                                                                                                                      )" << std::endl;
+                                                                                                                                                      )"
+              << std::endl;
 }
 
 void mediumLogo() {
@@ -330,7 +332,7 @@ int main() {
     }
 
     int len = 0;
-    for (const std::string& process : processesToKill) {
+    for (const std::string &process: processesToKill) {
         if (!process.empty()) len++;
     }
 
@@ -344,7 +346,7 @@ int main() {
     }
 
     std::cout << "Processes to kill:\n";
-    for (const std::string& process : processesToKill) {
+    for (const std::string &process: processesToKill) {
         if (!process.empty()) std::cout << process << '\n';
     }
 
