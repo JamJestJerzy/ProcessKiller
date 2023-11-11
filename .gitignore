@@ -34,3 +34,4 @@
 # Other
 *.properties
 yaml-cpp
+cmake-build-debug
