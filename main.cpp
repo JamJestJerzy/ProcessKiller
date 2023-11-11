@@ -118,34 +118,7 @@ void CALLBACK WinEventProc(
 
             std::filesystem::path filePath(utf8Path);
             std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")\n";
-            /*
-            for (std::string& i : processesToKill) {
-                std::string processName = filePath.filename().string();
 
-                std::transform(processName.begin(), processName.end(), processName.begin(), [](wchar_t c) {
-                    return std::tolower(c);
-                });
-
-                std::transform(i.begin(), i.end(), i.begin(), [](char c) {
-                    return std::tolower(static_cast<unsigned char>(c));
-                });
-
-                //std::cout << "processName: " << processName << std::endl;
-                std::cout << "x: " << typeid(i).name() << std::endl;
-                std::cout << "y: " << typeid(processName).name() << std::endl;
-                std::cout << "x=y: " << (i == processName) << std::endl;
-
-                const char* iCharArray = i.c_str();
-                const char* nameCharArray = processName.c_str();
-                std::cout << "xa: " << iCharArray << std::endl;
-                std::cout << "ya: " << nameCharArray << std::endl;
-
-                if (processName == i) {
-                    TerminateProcessByFileName(i);
-                    std::cout << "Should be terminated by now." << std::endl;
-                }
-            }
-             */
             for (std::string& i : processesToKill) {
                 std::string processName = filePath.filename().string();
 
