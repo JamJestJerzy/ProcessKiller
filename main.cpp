@@ -21,7 +21,7 @@
 #include <stdlib.h>
 
 // Current version string
-const std::string VERSION = "0.5.5";
+const std::string VERSION = "0.6.1";
 
 // Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -154,6 +154,64 @@ HWND GetParentProcess(HWND hwnd) {
     return GetParentProcessById(processId);
 }
 
+void EnumerateProcesses() {
+    HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        std::cerr << "Error creating process snapshot (" << GetLastError() << ")\n";
+        return;
+    }
+
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    if (!Process32First(hProcessSnap, &pe32)) {
+        std::cerr << "Error retrieving process information (" << GetLastError() << ")\n";
+        CloseHandle(hProcessSnap);
+        return;
+    }
+
+    do {
+        std::wstring parentProcessName = GetParentProcessName(pe32.th32ProcessID);
+
+        if (!parentProcessName.empty()) {
+            const std::wstring &widePath(parentProcessName);
+
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            std::string utf8Path = converter.to_bytes(widePath);
+
+            std::filesystem::path filePath(utf8Path);
+
+            // Just transformin processName
+            std::string processName = filePath.filename().string();
+            std::transform(processName.begin(), processName.end(), processName.begin(), [](char c) {
+                return std::tolower(c);
+            });
+            // Remove trailing whitespace characters
+            processName.erase(std::remove_if(processName.begin(), processName.end(), [](char c) {
+                return std::isspace(static_cast<unsigned char>(c));
+            }), processName.end());
+
+            // For each
+            for (std::string &i: processesToKill) {
+                std::transform(i.begin(), i.end(), i.begin(), [](char c) {
+                    return std::tolower(static_cast<unsigned char>(c));
+                });
+
+                i.erase(std::remove_if(i.begin(), i.end(), [](char c) {
+                    return std::isspace(static_cast<unsigned char>(c));
+                }), i.end());
+
+                if (processName == i) {
+                    TerminateProcessByFileName(i);
+                    std::cout << processName << " should be terminated by now. Enjoy ;)" << std::endl;
+                }
+            }
+        }
+    } while (Process32Next(hProcessSnap, &pe32));
+
+    CloseHandle(hProcessSnap);
+}
+
 void CALLBACK WinEventProc(
         HWINEVENTHOOK hWinEventHook,
         DWORD event,
@@ -163,7 +221,7 @@ void CALLBACK WinEventProc(
         DWORD dwEventThread,
         DWORD dwmsEventTime
 ) {
-    if (event == EVENT_SYSTEM_FOREGROUND || event == EVENT_SYSTEM_MINIMIZEEND || event == EVENT_SYSTEM_MINIMIZESTART) {
+    if (event == EVENT_SYSTEM_FOREGROUND) {
         DWORD processId;
         GetWindowThreadProcessId(hwnd, &processId);
 
@@ -177,7 +235,7 @@ void CALLBACK WinEventProc(
 
             std::filesystem::path filePath(utf8Path);
             std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring()
-                       << L")" << L" " << (int) processId << std::endl;
+                       << L")" << L" PID: " << (int) processId << std::endl;
 
             // Print parent process information
             DWORD parentProcessId = GetProcessId(GetParentProcess(hwnd));
@@ -190,21 +248,26 @@ void CALLBACK WinEventProc(
                 }
             }
 
+            // Just transformin processName
+            std::string processName = filePath.filename().string();
+            std::transform(processName.begin(), processName.end(), processName.begin(), [](char c) {
+                return std::tolower(c);
+            });
+            // Remove trailing whitespace characters
+            processName.erase(std::remove_if(processName.begin(), processName.end(), [](char c) {
+                return std::isspace(static_cast<unsigned char>(c));
+            }), processName.end());
+
+            if (processName == "windowsterminal.exe") {
+                std::cout << "Process is terminal. Checking if it got spawned by unwanted process." << std::endl;
+                EnumerateProcesses();
+            }
+
+            // For each
             for (std::string &i: processesToKill) {
-                std::string processName = filePath.filename().string();
-
-                std::transform(processName.begin(), processName.end(), processName.begin(), [](char c) {
-                    return std::tolower(c);
-                });
-
                 std::transform(i.begin(), i.end(), i.begin(), [](char c) {
                     return std::tolower(static_cast<unsigned char>(c));
                 });
-
-                // Remove trailing whitespace characters
-                processName.erase(std::remove_if(processName.begin(), processName.end(), [](char c) {
-                    return std::isspace(static_cast<unsigned char>(c));
-                }), processName.end());
 
                 i.erase(std::remove_if(i.begin(), i.end(), [](char c) {
                     return std::isspace(static_cast<unsigned char>(c));
