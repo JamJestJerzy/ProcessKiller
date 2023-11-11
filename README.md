@@ -22,7 +22,7 @@ Write to this file filenames of processes you want to kill. 1 filename for line<
 > - Clone this repository (```git clone https://github.com/JamJestJerzy/ProcessKiller.git```)<br>
 > - `cd` into cloned folder
 > - Make sure you have c compiler (`g++`) installed
-> - Run command ```.\build.ps1```
+> - Run command ```.\build.ps1``` in Windows PowerShell
 > - Compiled binary should be in current dir with name `ProcessKiller-{current version}.exe`
 ## License
 © All Rights Reserved
