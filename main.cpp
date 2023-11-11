@@ -13,7 +13,7 @@
 #include <codecvt>
 #include <conio.h>
 #include <algorithm>
-#include "libcurl/include/curl/curl.h"
+#include <cstdio>
 
 const std::string VERSION = "0.5.1";
 

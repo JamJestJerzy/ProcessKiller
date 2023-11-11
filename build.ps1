@@ -22,7 +22,7 @@ function Build-Program {
     )
 
     $outputFileName = ".\ProcessKiller-$version.exe"
-    $compileCommand = "g++ -o $outputFileName main.cpp -I.\libcurl\include -L. -lcurl -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs"
+    $compileCommand = "g++ -o $outputFileName main.cpp -I.\libcurl\include -L. -lcurl -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs -lws2_32"
 
     Invoke-Expression $compileCommand
 
