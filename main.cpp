@@ -2,7 +2,6 @@
 
 // Includes
 #include <winsock2.h>
-#include <Windows.h>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
@@ -14,14 +13,12 @@
 #include <codecvt>
 #include <conio.h>
 #include <algorithm>
-#include <cstdio>
-#include <unistd.h>
 #include <vector>
-#include <stdio.h>
-#include <stdlib.h>
+#include <locale>
+#include <codecvt>
 
 // Current version string
-const std::string VERSION = "0.6.1";
+const std::string VERSION = "0.6.2";
 
 // Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -35,7 +32,7 @@ using std::cout;
 using std::endl;
 
 // Function to terminate process using its filename
-void TerminateProcessByFileName(const std::string &fileName) {
+void TerminateProcessByFileName(std::basic_string<char> fileName) {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
         std::cerr << "Error creating process snapshot (" << GetLastError() << ")\n";
@@ -80,7 +77,10 @@ std::wstring GetTopLevelParentProcessName(DWORD processId) {
 
         if (QueryFullProcessImageNameA(hProcess, 0, processName, &size)) {
             CloseHandle(hProcess);
-            return std::wstring(processName, processName + size / sizeof(char));
+
+            // Convert the process name to wstring using codecvt
+            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            return converter.from_bytes(processName);
         }
 
         CloseHandle(hProcess);
