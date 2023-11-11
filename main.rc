@@ -1,0 +1,2 @@
+#include "windows.h"
+MAINICON ICON "icon.ico"
