@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const std::string VERSION = "0.5.3";
+const std::string VERSION = "0.5.4";
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -168,7 +168,7 @@ void CALLBACK WinEventProc(
             std::string utf8Path = converter.to_bytes(widePath);
 
             std::filesystem::path filePath(utf8Path);
-            std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")" << std::endl;
+            std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring() << L")" << L" " << (int)processId << std::endl;
 
             // Print parent process information
             DWORD parentProcessId = GetProcessId(GetParentProcess(hwnd));
@@ -180,9 +180,6 @@ void CALLBACK WinEventProc(
                     std::cout << "Parent process: " << utf8ParentPath << std::endl;
                 }
             }
-
-            // Print Process ID (PID)
-            std::cout << "Process ID (PID): " << (int)processId << std::endl;
 
             for (std::string& i : processesToKill) {
                 std::string processName = filePath.filename().string();
