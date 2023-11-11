@@ -18,7 +18,7 @@
 #include <codecvt>
 
 // Current version string
-const std::string VERSION = "0.6.2";
+const std::string VERSION = "0.6.5";
 
 // Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -35,7 +35,9 @@ using std::endl;
 void TerminateProcessByFileName(std::basic_string<char> fileName) {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        SetConsoleTextAttribute(hConsole, 6);
         std::cerr << "Error creating process snapshot (" << GetLastError() << ")\n";
+        SetConsoleTextAttribute(hConsole, 3);
         return;
     }
 
@@ -43,7 +45,9 @@ void TerminateProcessByFileName(std::basic_string<char> fileName) {
     pe32.dwSize = sizeof(PROCESSENTRY32);
 
     if (!Process32First(hProcessSnap, &pe32)) {
+        SetConsoleTextAttribute(hConsole, 6);
         std::cerr << "Error retrieving process information (" << GetLastError() << ")\n";
+        SetConsoleTextAttribute(hConsole, 3);
         CloseHandle(hProcessSnap);
         return;
     }
@@ -53,14 +57,20 @@ void TerminateProcessByFileName(std::basic_string<char> fileName) {
             HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
             if (hProcess != nullptr) {
                 if (TerminateProcess(hProcess, 0)) {
+                    SetConsoleTextAttribute(hConsole, 6);
                     std::cout << "Process " << fileName << " terminated successfully\n";
+                    SetConsoleTextAttribute(hConsole, 3);
                 } else {
+                    SetConsoleTextAttribute(hConsole, 4);
                     std::cerr << "Error terminating process (" << GetLastError() << ")\n";
+                    SetConsoleTextAttribute(hConsole, 3);
                 }
 
                 CloseHandle(hProcess);
             } else {
+                SetConsoleTextAttribute(hConsole, 4);
                 std::cerr << "Error opening process (" << GetLastError() << ")\n";
+                SetConsoleTextAttribute(hConsole, 3);
             }
         }
     } while (Process32Next(hProcessSnap, &pe32));
@@ -157,7 +167,9 @@ HWND GetParentProcess(HWND hwnd) {
 void EnumerateProcesses() {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        SetConsoleTextAttribute(hConsole, 4);
         std::cerr << "Error creating process snapshot (" << GetLastError() << ")\n";
+        SetConsoleTextAttribute(hConsole, 3);
         return;
     }
 
@@ -165,7 +177,9 @@ void EnumerateProcesses() {
     pe32.dwSize = sizeof(PROCESSENTRY32);
 
     if (!Process32First(hProcessSnap, &pe32)) {
+        SetConsoleTextAttribute(hConsole, 4);
         std::cerr << "Error retrieving process information (" << GetLastError() << ")\n";
+        SetConsoleTextAttribute(hConsole, 3);
         CloseHandle(hProcessSnap);
         return;
     }
@@ -203,7 +217,9 @@ void EnumerateProcesses() {
 
                 if (processName == i) {
                     TerminateProcessByFileName(i);
+                    SetConsoleTextAttribute(hConsole, 13);
                     std::cout << processName << " should be terminated by now. Enjoy ;)" << std::endl;
+                    SetConsoleTextAttribute(hConsole, 3);
                 }
             }
         }
@@ -234,8 +250,10 @@ void CALLBACK WinEventProc(
             std::string utf8Path = converter.to_bytes(widePath);
 
             std::filesystem::path filePath(utf8Path);
+            SetConsoleTextAttribute(hConsole, 9);
             std::wcout << L"New process spawned: " << filePath.filename().wstring() << L" (" << filePath.wstring()
                        << L")" << L" PID: " << (int) processId << std::endl;
+            SetConsoleTextAttribute(hConsole, 3);
 
             // Print parent process information
             DWORD parentProcessId = GetProcessId(GetParentProcess(hwnd));
@@ -259,7 +277,9 @@ void CALLBACK WinEventProc(
             }), processName.end());
 
             if (processName == "windowsterminal.exe") {
+                SetConsoleTextAttribute(hConsole, 14);
                 std::cout << "Process is terminal. Checking if it got spawned by unwanted process." << std::endl;
+                SetConsoleTextAttribute(hConsole, 3);
                 EnumerateProcesses();
             }
 
@@ -275,7 +295,9 @@ void CALLBACK WinEventProc(
 
                 if (processName == i) {
                     TerminateProcessByFileName(i);
+                    SetConsoleTextAttribute(hConsole, 13);
                     std::cout << processName << " should be terminated by now. Enjoy ;)" << std::endl;
+                    SetConsoleTextAttribute(hConsole, 3);
                 }
             }
         }
@@ -384,6 +406,13 @@ int main() {
         SetConsoleTextAttribute(hConsole, 7);
         return 0;
     } else {
+        // seperator
+        for (int i = 0; i < terminalWidth; ++i) {
+            std::cout << "-";
+        }
+        std::cout << std::endl << std::endl;
+        // end
+
         std::cout << "Found configuration file :)\n";
         std::string line;
         int i = 0;
@@ -418,8 +447,15 @@ int main() {
 
     std::cout << "Processes to kill:\n";
     for (const std::string &process: processesToKill) {
-        if (!process.empty()) std::cout << process << '\n';
+        if (!process.empty()) std::cout << "- " << process << '\n';
     }
+
+    // seperator
+    for (int i = 0; i < terminalWidth; ++i) {
+        std::cout << "-";
+    }
+    std::cout << std::endl << std::endl;
+    // end
 
     if (!SetWinEventHook(
             EVENT_SYSTEM_FOREGROUND,
