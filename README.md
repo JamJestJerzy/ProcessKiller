@@ -22,7 +22,7 @@ Write to this file filenames of processes you want to kill. 1 filename for line<
 > - Clone this repository (```git clone https://github.com/JamJestJerzy/ProcessKiller.git```)<br>
 > - `cd` into cloned folder
 > - Make sure you have c compiler (`g++`) installed
-> - Run command<br> ```g++ -o ProcessKiller .\main.cpp -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs```
-> - Compiled binary should be in current dir with name `ProcessKiller.exe`
+> - Run command ```.\build.ps1```
+> - Compiled binary should be in current dir with name `ProcessKiller-{current version}.exe`
 ## License
 © All Rights Reserved
