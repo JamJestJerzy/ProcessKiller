@@ -14,12 +14,18 @@
 #include <conio.h>
 #include <algorithm>
 #include <cstdio>
+#include <unistd.h>
+#include <vector>
 
 const std::string VERSION = "0.5.1";
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 std::string processesToKill[25] = {};
+
+using std::vector;
+using std::cout;
+using std::endl;
 
 void TerminateProcessByFileName(const std::string& fileName) {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -55,6 +61,22 @@ void TerminateProcessByFileName(const std::string& fileName) {
     } while (Process32Next(hProcessSnap, &pe32));
 
     CloseHandle(hProcessSnap);
+}
+
+vector<DWORD> pids_from_ppid(DWORD ppid) {
+    vector<DWORD> pids;
+    HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    PROCESSENTRY32 pe = { 0 };
+    pe.dwSize = sizeof(PROCESSENTRY32);
+    if (Process32First(hp, &pe)) {
+        do {
+            if (pe.th32ParentProcessID == ppid) {
+                pids.push_back(pe.th32ProcessID);
+            }
+        } while (Process32Next(hp, &pe));
+    }
+    CloseHandle(hp);
+    return pids;
 }
 
 std::wstring GetTopLevelParentProcessName(DWORD processId) {
