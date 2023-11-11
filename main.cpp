@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const std::string VERSION = "0.5.2";
+const std::string VERSION = "0.5.3";
 
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -73,7 +73,7 @@ std::wstring GetTopLevelParentProcessName(DWORD processId) {
 
         if (QueryFullProcessImageNameA(hProcess, 0, processName, &size)) {
             CloseHandle(hProcess);
-            return std::wstring(processName, processName + size / sizeof(char) - 1);
+            return std::wstring(processName, processName + size / sizeof(char));
         }
 
         CloseHandle(hProcess);
