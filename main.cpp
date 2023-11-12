@@ -20,7 +20,7 @@
 #pragma comment(lib, "winhttp.lib")
 
 // Current version string
-std::string VERSION = "0.7.2";
+std::string VERSION = "0.7.3";
 
 // Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -559,6 +559,7 @@ int main() {
     // end
 
     std::string latestRelease = getLatestVersion();
+    std::string latestReleaseTag = latestRelease;
 
     if (!latestRelease.empty()) {
         latestRelease.erase(std::remove(latestRelease.begin(), latestRelease.end(), '.'), latestRelease.end());
@@ -576,7 +577,7 @@ int main() {
             SetConsoleTextAttribute(hConsole, 3);
         } else {
             SetConsoleTextAttribute(hConsole, 4);
-            std::cout << "You are running an outdated version of the program. Download the latest release at https://github.com/JamJestJerzy/ProcessKiller/releases/tag/" << latestRelease << std::endl;
+            std::cout << "You are running an outdated version of the program. Download the latest release at: \nhttps://github.com/JamJestJerzy/ProcessKiller/releases/tag/" << latestReleaseTag << std::endl;
             SetConsoleTextAttribute(hConsole, 3);
         }
     } else {
