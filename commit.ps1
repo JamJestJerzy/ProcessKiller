@@ -8,7 +8,7 @@ function Get-Version {
     $content = Get-Content -Path $filePath -Raw
 
     # Use regex to extract version
-    $versionPattern = 'const std::string VERSION = "(.+?)";'
+    $versionPattern = 'std::string VERSION = "(.+?)";'
     $versionMatch = [regex]::Match($content, $versionPattern)
 
     if ($versionMatch.Success) {

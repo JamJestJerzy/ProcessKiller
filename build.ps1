@@ -4,7 +4,7 @@ function Get-Version {
     $content = Get-Content -Path $filePath -Raw
 
     # Use regex to extract version
-    $versionPattern = 'const std::string VERSION = "(.+?)";'
+    $versionPattern = 'std::string VERSION = "(.+?)";'
     $versionMatch = [regex]::Match($content, $versionPattern)
 
     if ($versionMatch.Success) {
@@ -22,7 +22,7 @@ function Build-Program {
     )
 
     $outputFileName = ".\ProcessKiller-$version.exe"
-    $compileCommand = "g++ -o $outputFileName main.cpp -I.\libcurl\include -L. -lcurl -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs -lws2_32"
+    $compileCommand = "g++ -o $outputFileName main.cpp -I.\libcurl\include -L. -lcurl -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs -lws2_32 -lwinhttp"
 
     Invoke-Expression $compileCommand
 
