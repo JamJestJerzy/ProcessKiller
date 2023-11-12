@@ -14,5 +14,6 @@ HWND GetParentProcessById(DWORD processId);
 HWND GetParentProcess(HWND hwnd);
 void EnumerateProcesses(std::string (&processesToKill)[25]);
 HANDLE getHConsole();
+void GetAllProcesses(std::string (&processesToKill)[25]);
 
 #endif

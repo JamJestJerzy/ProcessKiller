@@ -11,18 +11,15 @@
 #include <fstream>
 #include <filesystem>
 #include <string>
-#include <tchar.h>
 #include <cctype>
 #include <locale>
 #include <codecvt>
 #include <conio.h>
 #include <algorithm>
 #include <vector>
-#include <winhttp.h>
-#pragma comment(lib, "winhttp.lib")
 
 // Current version string
-std::string VERSION = "0.7.6";
+std::string VERSION = "0.8.2";
 
 // Initializes empty array
 std::string processesToKill[25] = {};
@@ -80,11 +77,12 @@ void CALLBACK WinEventProc(
                 return std::isspace(static_cast<unsigned char>(c));
             }), processName.end());
 
-            if (processName == "windowsterminal.exe") {
+            if (processName == "windowsterminal.exe" || processName == "powershell.exe" || processName == "cmd.exe") {
                 SetConsoleTextAttribute(getHConsole(), 14);
                 std::cout << "Process is terminal. Checking if it got spawned by unwanted process." << std::endl;
                 SetConsoleTextAttribute(getHConsole(), 3);
-                EnumerateProcesses(processesToKill);
+                //EnumerateProcesses(processesToKill);
+                GetAllProcesses(processesToKill);
             }
 
             // For each
@@ -234,6 +232,7 @@ int main() {
         SetConsoleTextAttribute(getHConsole(), 7);
         return 1;
     }
+
 
     MSG msg;
     while (GetMessage(&msg, nullptr, 0, 0)) {

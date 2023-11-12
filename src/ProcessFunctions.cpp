@@ -147,6 +147,10 @@ HWND GetParentProcess(HWND hwnd) {
     return GetParentProcessById(processId);
 }
 
+HANDLE getHConsole() {
+    return hConsole;
+}
+
 void EnumerateProcesses(std::string (&processesToKill)[25]) {
     HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hProcessSnap == INVALID_HANDLE_VALUE) {
@@ -211,6 +215,52 @@ void EnumerateProcesses(std::string (&processesToKill)[25]) {
     CloseHandle(hProcessSnap);
 }
 
-HANDLE getHConsole() {
-    return hConsole;
-}
+void GetAllProcesses(std::string (&processesToKill)[25]) {
+    try {
+        HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (hSnapshot == INVALID_HANDLE_VALUE) {
+            // Handle error
+            return;
+        }
+        PROCESSENTRY32 pe32;
+        pe32.dwSize = sizeof(PROCESSENTRY32);
+        if (!Process32First(hSnapshot, &pe32)) {
+            CloseHandle(hSnapshot);
+            // Handle error
+            return;
+        }
+        do {
+            // Access process information through the pe32 structure
+            //_tprintf(TEXT("Process ID: %d, Name: %s\n"), pe32.th32ProcessID, pe32.szExeFile);
+            std::string processName = pe32.szExeFile;
+            std::transform(processName.begin(), processName.end(), processName.begin(), [](char c) {
+                return std::tolower(c);
+            });
+            processName.erase(std::remove_if(processName.begin(), processName.end(), [](char c) {
+                return std::isspace(static_cast<unsigned char>(c));
+            }), processName.end());
+            for (std::string &i: processesToKill) {
+                std::transform(i.begin(), i.end(), i.begin(), [](char c) {
+                    return std::tolower(static_cast<unsigned char>(c));
+                });
+
+                i.erase(std::remove_if(i.begin(), i.end(), [](char c) {
+                    return std::isspace(static_cast<unsigned char>(c));
+                }), i.end());
+
+                if (processName == i) {
+                    TerminateProcessByFileName(i);
+                    SetConsoleTextAttribute(hConsole, 13);
+                    std::cout << processName << " should be terminated by now. Enjoy ;)" << std::endl;
+                    SetConsoleTextAttribute(hConsole, 3);
+                }
+            }
+        } while (Process32Next(hSnapshot, &pe32));
+
+        CloseHandle(hSnapshot);
+    } catch (const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "Unknown exception occurred." << std::endl;
+    }
+};
