@@ -20,7 +20,7 @@
 #pragma comment(lib, "winhttp.lib")
 
 // Current version string
-std::string VERSION = "0.7.1";
+std::string VERSION = "0.7.2";
 
 // Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -373,9 +373,7 @@ void smallLogo() {
     std::cout << "                     |___/          \n" << std::endl;
 }
 
-// Actual main function
-
-int main() {
+std::string getLatestVersion() {
     /* Request (begining) */
     DWORD dwSize = 0;
     DWORD dwDownloaded = 0;
@@ -471,23 +469,12 @@ int main() {
 
     /* ----- Request (end) ------ */
 
-    if (!extractedVersion.empty()) {
-        extractedVersion.erase(std::remove(extractedVersion.begin(), extractedVersion.end(), '.'), extractedVersion.end());
-        VERSION.erase(std::remove(VERSION.begin(), VERSION.end(), '.'), VERSION.end());
-        int latestVersion = std::stoi(extractedVersion, nullptr, 10);
-        int currentVersion = std::stoi(VERSION, nullptr, 10);
+    return extractedVersion;
+}
 
-        if (currentVersion == latestVersion) {
-            std::cout << "You are running the latest release!" << std::endl;
-        } else if (currentVersion > latestVersion) {
-            std::cout << "You are running a newer version than is released!" << std::endl;
-        } else {
-            std::cout << "You are running an outdated version of the program. Download the latest release at https://github.com/JamJestJerzy/ProcessKiller/releases" << std::endl;
-        }
-    } else {
-        std::cout << "Failed to check version." << std::endl;
-    }
+// Actual main function
 
+int main() {
     SetConsoleTextAttribute(hConsole, 6);
     int terminalWidth = getTerminalWidth();
     std::cout << "Terminal Width: " << terminalWidth << " columns" << std::endl;
@@ -570,6 +557,31 @@ int main() {
     }
     std::cout << std::endl << std::endl;
     // end
+
+    std::string latestRelease = getLatestVersion();
+
+    if (!latestRelease.empty()) {
+        latestRelease.erase(std::remove(latestRelease.begin(), latestRelease.end(), '.'), latestRelease.end());
+        VERSION.erase(std::remove(VERSION.begin(), VERSION.end(), '.'), VERSION.end());
+        int latestVersion = std::stoi(latestRelease, nullptr, 10);
+        int currentVersion = std::stoi(VERSION, nullptr, 10);
+
+        if (currentVersion == latestVersion) {
+            SetConsoleTextAttribute(hConsole, 2);
+            std::cout << "You are running the latest release!" << std::endl;
+            SetConsoleTextAttribute(hConsole, 3);
+        } else if (currentVersion > latestVersion) {
+            SetConsoleTextAttribute(hConsole, 6);
+            std::cout << "You are running a newer version than is released. Somehow" << std::endl;
+            SetConsoleTextAttribute(hConsole, 3);
+        } else {
+            SetConsoleTextAttribute(hConsole, 4);
+            std::cout << "You are running an outdated version of the program. Download the latest release at https://github.com/JamJestJerzy/ProcessKiller/releases/tag/" << latestRelease << std::endl;
+            SetConsoleTextAttribute(hConsole, 3);
+        }
+    } else {
+        std::cout << "Failed to check version." << std::endl;
+    }
 
     if (!SetWinEventHook(
             EVENT_SYSTEM_FOREGROUND,
