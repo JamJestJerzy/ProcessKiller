@@ -72,8 +72,14 @@ std::wstring GetTopLevelParentProcessName(DWORD processId) {
             CloseHandle(hProcess);
 
             // Convert the process name to wstring using codecvt
-            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            return converter.from_bytes(processName);
+            try {
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                return converter.from_bytes(processName);
+            } catch (const std::exception& e) {
+                std::cerr << "Error converting processName: " << e.what() << std::endl;
+                // Handle the error or return a default value.
+                return L"";
+            }
         }
 
         CloseHandle(hProcess);

@@ -17,9 +17,10 @@
 #include <conio.h>
 #include <algorithm>
 #include <vector>
+#include <thread>
 
 // Current version string
-std::string VERSION = "0.8.2";
+std::string VERSION = "0.9.1";
 
 // Initializes empty array
 std::string processesToKill[25] = {};
@@ -242,5 +243,11 @@ int main() {
 
     UnhookWinEvent(nullptr);
     SetConsoleTextAttribute(getHConsole(), 7);
+
+    while (true) {
+        GetAllProcesses(processesToKill);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
     return 0;
 }
