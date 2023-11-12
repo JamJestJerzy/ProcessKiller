@@ -20,7 +20,7 @@
 #pragma comment(lib, "winhttp.lib")
 
 // Current version string
-std::string VERSION = "0.7.0";
+std::string VERSION = "0.7.1";
 
 // Idk. It enables access to terminal colors tho :)
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
