@@ -1,39 +1,48 @@
 # Function to extract version from main.cpp
-function Get-Version {
-    $filePath = "main.cpp"  # Replace with the actual path to your main.cpp file
+function Get-Version
+{
+    $filePath = "src/main.cpp"  # Replace with the actual path to your main.cpp file
     $content = Get-Content -Path $filePath -Raw
 
     # Use regex to extract version
     $versionPattern = 'std::string VERSION = "(.+?)";'
     $versionMatch = [regex]::Match($content, $versionPattern)
 
-    if ($versionMatch.Success) {
+    if ($versionMatch.Success)
+    {
         return $versionMatch.Groups[1].Value
-    } else {
+    }
+    else
+    {
         Write-Host "Error: Version not found in main.cpp. Please check the file."
         exit 1
     }
 }
 
 # Function to build the C++ program
-function Build-Program {
+function Build-Program
+{
     param (
         [string]$version
     )
 
     $outputFolder = "builds"
-    if (-not (Test-Path $outputFolder)) {
+    if (-not(Test-Path $outputFolder))
+    {
         New-Item -ItemType Directory -Path $outputFolder | Out-Null
     }
 
     $outputFileName = Join-Path $outputFolder "ProcessKiller-$version.exe"
-    $compileCommand = "g++ -o $outputFileName main.cpp -I.\libcurl\include -L. -lcurl -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs -lws2_32 -lwinhttp"
+    $compileCommand = "g++ -o $outputFileName src/main.cpp src/LogoFunctions.cpp src/ProcessFunctions.cpp -I.\libcurl\include -L. -lcurl -static-libgcc -static-libstdc++ -static -lpthread -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lwinmm -lmingw32 -lmingwex -lmsvcrt -lmsvcr100 -lversion -lstdc++fs -lws2_32 -lwinhttp"
 
     Invoke-Expression $compileCommand
 
-    if ($LASTEXITCODE -eq 0) {
+    if ($LASTEXITCODE -eq 0)
+    {
         Write-Host "Build successful. Output file: $outputFileName"
-    } else {
+    }
+    else
+    {
         Write-Host "Build failed. Please check the compilation command and errors."
         exit 1
     }
